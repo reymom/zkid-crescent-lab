@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# zkid-crescent-lab/scripts/patch_crescent_rust.sh
-# Purpose: patch Crescent's Rust workspace for a smooth local build.
+# Patch Crescent's Rust workspace for a smooth local build.
 
 set -euo pipefail
 

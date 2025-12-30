@@ -1,39 +1,40 @@
 #!/usr/bin/env bash
-# zkid-crescent-lab/scripts/setup_python.sh
-# Purpose: install Python deps required by Crescent's circuit_setup scripts in an isolated venv.
+# Install Python deps required by Crescent's circuit_setup scripts in an isolated venv.
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CRESCENT_SCRIPTS_DIR="${ROOT_DIR}/vendor/crescent-credentials/circuit_setup/scripts"
-VENV_DIR="${CRESCENT_SCRIPTS_DIR}/.venv"
+VENV_DIR="${ROOT_DIR}/.venv"
+REQ_FILE="${ROOT_DIR}/requirements.txt"
 
-if [[ ! -d "${CRESCENT_SCRIPTS_DIR}" ]]; then
-  echo "Missing Crescent circuit_setup scripts dir at ${CRESCENT_SCRIPTS_DIR}. Did you run vendor_crescent.sh?" >&2
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "python3 not found. Please install Python 3." >&2
   exit 1
 fi
 
-if [[ ! -x "$(command -v python3)" ]]; then
-  echo "python3 not found. Install Python 3.x first." >&2
+if [ ! -f "${REQ_FILE}" ]; then
+  echo "Missing ${REQ_FILE} (expected at repo root)." >&2
   exit 1
 fi
 
-if [[ ! -d "${VENV_DIR}" ]]; then
-  echo "Creating Python venv: ${VENV_DIR}"
+if [ ! -d "${VENV_DIR}" ]; then
+  echo "[setup_python] Creating venv at ${VENV_DIR}"
   python3 -m venv "${VENV_DIR}"
+else
+  echo "[setup_python] Reusing existing venv at ${VENV_DIR}"
 fi
 
-# shellcheck disable=SC1091
-source "${VENV_DIR}/bin/activate"
+# Always use the venv's interpreter + pip explicitly (no reliance on 'source')
+PY="${VENV_DIR}/bin/python"
+PIP="${VENV_DIR}/bin/pip"
 
-python -m pip install --upgrade pip wheel setuptools
+echo "[setup_python] Upgrading pip/setuptools/wheel"
+"${PY}" -m pip install --upgrade pip setuptools wheel >/dev/null
 
-# Minimal set inferred from Crescent's jwk_gen.py import path:
-#   import python_jwt as jwt, jwcrypto.jwk as jwk
-# We also include cryptography to satisfy common backend requirements.
-python -m pip install "python-jwt" "jwcrypto" "cryptography"
+echo "[setup_python] Installing requirements from ${REQ_FILE}"
+"${PIP}" install -r "${REQ_FILE}"
 
-echo "Python deps installed. Important: run setup scripts with this venv activated:" 
-echo "  cd vendor/crescent-credentials/circuit_setup/scripts"
-echo "  source .venv/bin/activate"
-echo "  ./run_setup.sh rs256-sd"
+echo
+echo "[setup_python] Done."
+echo "Activate with:"
+echo "  source ${VENV_DIR}/bin/activate"
