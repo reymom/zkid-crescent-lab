@@ -39,6 +39,8 @@ pub struct SampleRow {
     pub exit_code: i32,
     pub kept_stdout: Option<String>,
     pub kept_stderr: Option<String>,
+    pub artifact_path: Option<String>,
+    pub artifact_bytes: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -54,6 +56,10 @@ pub struct SummaryRow {
     pub p95_ms: u128,
     pub mean_ms: u128,
     pub max_ms: u128,
+    pub artifact_iters: usize,
+    pub artifact_p50_bytes: Option<u64>,
+    pub artifact_mean_bytes: Option<u64>,
+    pub artifact_max_bytes: Option<u64>,
 }
 
 #[derive(Debug, Clone)]
@@ -65,12 +71,12 @@ pub struct StepRun {
     pub exit_code: i32,
     pub kept_stdout: Option<PathBuf>,
     pub kept_stderr: Option<PathBuf>,
+    pub artifact_path: Option<PathBuf>,
+    pub artifact_bytes: Option<u64>,
 }
 
 #[derive(Debug, Clone)]
 pub struct RunOutputs {
-    pub run_id: String,
-    pub run_dir: PathBuf,
     pub samples: Vec<SampleRow>,
     pub summary: Vec<SummaryRow>,
 }
